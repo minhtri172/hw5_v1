@@ -1,0 +1,690 @@
+$(document).ready(function () {
+  var ScrabbleTiles = [];
+  ScrabbleTiles["A"] = { "value": 1, "distribution": 9, "remaining": 9 };
+  ScrabbleTiles["B"] = { "value": 3, "distribution": 2, "remaining": 2 };
+  ScrabbleTiles["C"] = { "value": 3, "distribution": 2, "remaining": 2 };
+  ScrabbleTiles["D"] = { "value": 2, "distribution": 4, "remaining": 4 };
+  ScrabbleTiles["E"] = { "value": 1, "distribution": 12, "remaining": 12 };
+  ScrabbleTiles["F"] = { "value": 4, "distribution": 2, "remaining": 2 };
+  ScrabbleTiles["G"] = { "value": 2, "distribution": 3, "remaining": 3 };
+  ScrabbleTiles["H"] = { "value": 4, "distribution": 2, "remaining": 2 };
+  ScrabbleTiles["I"] = { "value": 1, "distribution": 9, "remaining": 9 };
+  ScrabbleTiles["J"] = { "value": 8, "distribution": 1, "remaining": 1 };
+  ScrabbleTiles["K"] = { "value": 5, "distribution": 1, "remaining": 1 };
+  ScrabbleTiles["L"] = { "value": 1, "distribution": 4, "remaining": 4 };
+  ScrabbleTiles["M"] = { "value": 3, "distribution": 2, "remaining": 2 };
+  ScrabbleTiles["N"] = { "value": 1, "distribution": 6, "remaining": 6 };
+  ScrabbleTiles["O"] = { "value": 1, "distribution": 8, "remaining": 8 };
+  ScrabbleTiles["P"] = { "value": 3, "distribution": 2, "remaining": 2 };
+  ScrabbleTiles["Q"] = { "value": 10, "distribution": 1, "remaining": 1 };
+  ScrabbleTiles["R"] = { "value": 1, "distribution": 6, "remaining": 6 };
+  ScrabbleTiles["S"] = { "value": 1, "distribution": 4, "remaining": 4 };
+  ScrabbleTiles["T"] = { "value": 1, "distribution": 6, "remaining": 6 };
+  ScrabbleTiles["U"] = { "value": 1, "distribution": 4, "remaining": 4 };
+  ScrabbleTiles["V"] = { "value": 4, "distribution": 2, "remaining": 2 };
+  ScrabbleTiles["W"] = { "value": 4, "distribution": 2, "remaining": 2 };
+  ScrabbleTiles["X"] = { "value": 8, "distribution": 1, "remaining": 1 };
+  ScrabbleTiles["Y"] = { "value": 4, "distribution": 2, "remaining": 2 };
+  ScrabbleTiles["Z"] = { "value": 10, "distribution": 1, "remaining": 1 };
+  ScrabbleTiles["_"] = { "value": 0, "distribution": 2, "remaining": 2 };
+
+  sampleSpaceLetters = [];
+
+  var i, j;
+  var distribution;
+  for (i = 0; i < Object.keys(ScrabbleTiles).length; i++) {
+    distribution = ScrabbleTiles[Object.keys(ScrabbleTiles)[i]].distribution;
+    for (j = 0; j < distribution; j++) {
+      sampleSpaceLetters.push(Object.keys(ScrabbleTiles)[i]);
+    }
+  }
+
+  // Store the result words
+  var myString = new Array(15).fill('*');;
+
+  //https://johnresig.com/blog/dictionary-lookups-in-javascript/
+  // The dictionary lookup object
+  var dict = {};
+
+  var chosenLetter;
+  var coef = 100; // coefficient random
+  var totalScore = 0;
+  var isValidWord = false;
+
+  $.get("dict/dict.txt", function (txt) {
+    // Get an array of all the words
+    var words = txt.split("\n");
+    //console.log(words);
+
+    // And add them as properties to the dictionary lookup
+    // This will allow for fast lookups later
+    for (i = 0; i < words.length; i++) {
+      dict[words[i]] = true;
+    }
+
+    //console.log(dict);
+  });
+
+  // Create Board
+  $("#board").append("<table id='tableBoard'></table>");
+  $("#tableBoard").append("<tr></tr>");
+  for (i = 0; i < 15; i++) {
+    if (i == 2 || i == 12) {
+      $("#board tr").append("<td data-index='" + i + "' data-price='word-2' data-status='off'></td>");
+    } else if (i == 6 || i == 8) {
+      $("#board tr").append("<td data-index='" + i + "' data-price='letter-2' data-status='off'></td>");
+    } else {
+      $("#board tr").append("<td data-index='" + i + "' data-status='off'></td>");
+    }
+  }
+
+  // Create holder
+  $("#holder").append("<table id='tableHolder'></table>");
+
+  $("#tableHolder").append("<tr></tr>");
+  for (i = 0; i < 7; i++) {
+    var randomLetter = Math.floor(Math.random() * coef);
+    var nameLetter = sampleSpaceLetters[randomLetter];
+
+
+    if (nameLetter != null) {
+      ScrabbleTiles[nameLetter].remaining--;
+      coef--;
+      var index = sampleSpaceLetters.indexOf(nameLetter);
+      sampleSpaceLetters.splice(index, 1);
+    }
+
+    if (nameLetter != "_") {
+      $("#tableHolder tr").append(
+        "<td data-status='on'><img data-name='" + nameLetter +
+        "' src='./images/Scrabble_Tile_" + nameLetter + ".jpg'" + "data-index-holder=" + i + "></td>");
+      $("#tableHolder td").eq(i).droppable({
+        accept: "img[data-index-holder='" + i + "']"
+      });
+    } else {
+      nameLetter = "Blank";
+      $("#tableHolder tr").append(
+        "<td data-status='on'><img data-name='" + nameLetter
+        + "' src='./images/Scrabble_Tile_" + nameLetter + ".jpg'" + "data-index-holder=" + i + "></td>");
+      $("#tableHolder td").eq(i).droppable({
+        accept: "img[data-index-holder='" + i + "']"
+      });
+    }
+  }
+
+  /*###############################
+    #   BUTTON HERE
+    ###############################
+  */
+  $("#btnNextWord").click(function () {
+    // Display Score
+    totalScore += score();
+    if ($("#tableHolder td[data-status='off']").length > 0) {
+      if (isValidWord) {
+        printErrorMessages("");
+        $("img[data-status='on']").css({
+          position: "relative",
+          top: 0,
+          left: 0
+        });
+
+        $("#myString").text("Word:");
+        $("#score").text("Score: 0");
+        $("#totalScore").text("Total Score: " + totalScore);
+        $("#save").append("<p>Word: " + displayString() + " ---- Score: " + score() + "</p>");
+
+        $("#tableBoard td").attr("data-status", "off");
+        $("img").removeAttr("data-index");
+        $("#tableBoard td").droppable('option', 'accept', "img");
+        myString.fill("*");
+
+        for (i = 0; i < 7; i++) {
+          if ($("#tableHolder td").eq(i).attr("data-status") == "off") {
+            //console.log($("#tableHolder td").eq(i).attr("data-status"))
+            var randomLetter = Math.floor(Math.random() * coef);
+            var nameLetter = sampleSpaceLetters[randomLetter];
+            if (nameLetter != null) {
+              ScrabbleTiles[nameLetter].remaining--;
+              coef--;
+              var index = sampleSpaceLetters.indexOf(nameLetter);
+
+              // remove letter from sample space
+              if (sampleSpaceLetters.length > 0) {
+                sampleSpaceLetters.splice(index, 1);
+                updateRemainTable();
+              }
+
+              if (nameLetter != "_") {
+                $("#tableHolder img").eq(i).attr("data-name", nameLetter);
+                $("#tableHolder img").eq(i).attr("src", "./images/Scrabble_Tile_" + nameLetter + ".jpg");
+                $("#tableHolder img").eq(i).removeAttr("data-status");
+                $("#tableHolder img").eq(i).removeAttr("data-index");
+              } else {
+                nameLetter = "Blank";
+                $("#tableHolder img").eq(i).attr("data-name", nameLetter);
+                $("#tableHolder img").eq(i).attr("src", "./images/Scrabble_Tile_" + nameLetter + ".jpg");
+                $("#tableHolder img").eq(i).removeAttr("data-status");
+                $("#tableHolder img").eq(i).removeAttr("data-index");
+              }
+            } else {
+              printErrorMessages("There is no more letter.");
+            }
+            $("#tableHolder td").eq(i).attr("data-status", "on");
+          }
+        }
+        isValidWord = false;
+      } else {
+        printErrorMessages("Word is not valid.");
+      }
+    } else {
+      printErrorMessages("No words on the board.");
+    }
+  });
+
+  $("#btnStartOver").click(function () {
+
+    $("img[data-status='on']").css({
+      position: "relative",
+      top: 0,
+      left: 0
+    });
+
+    $("#tableBoard td").droppable('option', 'accept', "img");
+    $("#tableBoard td").attr("data-status", "off");
+    $("img").removeAttr("data-index");
+    myString.fill("*");
+    totalScore = 0;
+
+    $("#myString").text("Word: " + displayString());
+    $("#score").text("Score: 0");
+    $("#error-message p").text("");
+
+    $("#totalScore").text("Total Score: 0");
+    $("#save p").text("");
+
+    //console.log("Before remove: " + sampleSpaceLetters);
+    var indexOfLetter = 0;
+    for (i = 0; i < Object.keys(ScrabbleTiles).length; i++) {
+      distribution = ScrabbleTiles[Object.keys(ScrabbleTiles)[i]].distribution;
+      ScrabbleTiles[Object.keys(ScrabbleTiles)[i]].remaining = ScrabbleTiles[Object.keys(ScrabbleTiles)[i]].distribution;
+      for (j = 0; j < distribution; j++) {
+        sampleSpaceLetters[indexOfLetter] = Object.keys(ScrabbleTiles)[i];
+        indexOfLetter++;
+      }
+    }
+
+    coef = 100;
+
+    //console.log(sampleSpaceLetters);
+
+    for (i = 0; i < 7; i++) {
+      var randomLetter = Math.floor(Math.random() * coef);
+      var nameLetter = sampleSpaceLetters[randomLetter];
+      //console.log(nameLetter);
+
+      if (nameLetter != null) {
+        ScrabbleTiles[nameLetter].remaining--;
+        coef--;
+        var index = sampleSpaceLetters.indexOf(nameLetter);
+        if (sampleSpaceLetters.length > 0) {
+          sampleSpaceLetters.splice(index, 1);
+        }
+        updateRemainTable();
+        if (nameLetter != "_") {
+          $("#tableHolder img").eq(i).attr("data-name", nameLetter);
+          $("#tableHolder img").eq(i).attr("src", "./images/Scrabble_Tile_" + nameLetter + ".jpg");
+          $("#tableHolder img").eq(i).removeAttr("data-status");
+        } else {
+          nameLetter = "Blank";
+          $("#tableHolder img").eq(i).attr("data-name", nameLetter);
+          $("#tableHolder img").eq(i).attr("src", "./images/Scrabble_Tile_" + nameLetter + ".jpg");
+          $("#tableHolder img").eq(i).removeAttr("data-status");
+        }
+      } else {
+        printErrorMessages("There is no more letter.");
+      }
+    }
+    //console.log("After remove: " + sampleSpaceLetters);
+
+  });
+
+  $("#btnReset").click(function () {
+    $("img[data-status='on']").css({
+      position: "relative",
+      top: 0,
+      left: 0
+    });
+
+    for (i = 0; i < $("img[data-status='on']").length; i++) {
+      console.log($("img[data-status='on']").eq(i).attr("data-index"))
+      $("#tableBoard td[data-index='" + $("img[data-status='on']").eq(i).attr("data-index") + "']")
+        .attr("data-status", "off");
+    }
+    
+    printErrorMessages("");
+    $("#tableHolder td[data-status='off']").attr("data-status", 'on');
+    $("#tableBoard td").droppable('option', 'accept', "img");
+    $("#myString").text("Word:");
+    myString.fill("*");
+    $("#myString").text("Word: " + displayString());
+    $("#score").text("Score: 0");
+
+    $("img").removeAttr("data-status");
+    $("img").removeAttr("data-index");
+    $("#tableHolder img[data-previous-letter='_']").attr("src", "./images/Scrabble_Tile_Blank.jpg");
+    $("#tableHolder img[data-previous-letter='_']").attr("data-name", "Blank");
+  });
+
+  // Create remaining table
+  $("#left-display").append("<table id='tableRemain'></table>");
+  j = 0;
+  for (i = 1; i <= 5; i++) {
+    $("#tableRemain").append("<tr></tr>");
+    while (j < 6 * i) {
+      if (Object.keys(ScrabbleTiles)[j] != null) {
+        $("#tableRemain tr").eq((i - 1)).append("<td>" +
+          Object.keys(ScrabbleTiles)[j] + ": " +
+          ScrabbleTiles[Object.keys(ScrabbleTiles)[j]].remaining + "</td>");
+      }
+      j++;
+    }
+  }
+
+  // Create choose table letter when play has blank
+  $("#dialog-message").append("<ul id='selectables'></ul>");
+  for (i = 0; i < Object.keys(ScrabbleTiles).length - 1; i++) {
+    $("#dialog-message ul").append("<li data-name='" +
+      Object.keys(ScrabbleTiles)[i] + "'><img src='./images/Scrabble_Tile_" +
+      Object.keys(ScrabbleTiles)[i] + ".jpg'></li>");
+  }
+
+  $("#dialog-message").dialog({
+    dialogClass: "no-close",
+    autoOpen: false,
+    modal: true,
+    width: "500",
+    buttons: {
+      Ok: function () {
+        if (chosenLetter != null) {
+          //console.log(chosenLetter)
+          $("img[data-status='on'][data-name='Blank']").attr("data-name", chosenLetter);
+          myString[$("img[data-status='on'][data-name='" + chosenLetter + "']").attr("data-index")] = chosenLetter;
+          //console.log("update string: " + myString);
+          $("#myString").text("Word: " + displayString());
+          // Display Score
+          $("#score").text("Score:" + score());
+          chosenLetter = null;
+          $("li[class='ui-selectee ui-selected']").css("background-color", "black");
+          $(this).dialog("close");
+        } else {
+          if ($("#dialog-message p").length) {
+            $("#dialog-message p").remove();
+          }
+          $("#dialog-message").append("<p>Please choose one letter.</p>")
+          $("#dialog-message p").css("color", "red");
+        }
+
+      }
+    }
+  });
+
+  // selectable for dialog
+  $("#selectables").selectable({
+    selected: function (event, ui) {
+      chosenLetter = $(ui.selected).attr("data-name");
+      //console.log(chosenLetter)
+      if (chosenLetter != null) {
+        if ($("#dialog-message p").length) {
+          $("#dialog-message p").remove();
+        }
+        $("img[data-status='on'][data-name='Blank']").attr("data-previous-letter", "_");
+        $("img[data-status='on'][data-name='Blank']").attr("src", "./images/Scrabble_Tile_" + chosenLetter + ".jpg")
+        $(ui.selected).css("background-color", "red");
+      } else {
+        $("img[data-status='on'][data-name='Blank']").attr("src", "./images/Scrabble_Tile_Blank.jpg")
+        $("li[class='ui-selectee ui-selected']").css("background-color", "black");
+      }
+    },
+    unselected: function (event, ui) {
+      $(ui.unselected).css("background-color", "black");
+      chosenLetter = null;
+    }
+  });
+
+  // Draggable
+  $("#tableHolder td img").draggable({
+    containment: "document",
+    drag: function (event, ui) {
+      $(this).draggable("option", "revert", "invalid");
+      $("#tableHolder td").eq($(this).attr("data-index-holder")).css("box-shadow", "0px 0px 7px 8px blue");;
+    },
+    stop: function (event, ui) {
+      $("#tableHolder td").eq($(this).attr("data-index-holder")).css("box-shadow", "");;
+    }
+  });
+
+  // Board Droppable
+  $("#tableBoard td").droppable({
+    drop: function (event, ui) {
+      $(this).css("box-shadow", "");
+      //console.log("accept items from holder");
+      //console.log(myString);
+
+      // set holder off
+      $("#tableHolder td").eq(ui.draggable.attr("data-index-holder")).attr("data-status", "off");
+      var letterResult = ui.draggable.attr("data-name"); // get letter
+
+      if (letterResult == "Blank") {
+        $("#dialog-message").dialog("open");
+      }
+
+      // Get index of the letter (where it is)
+      var index = $(this).attr("data-index");
+      myString[index] = letterResult;
+
+      // delete old position of letter
+      if (ui.draggable.attr("data-index") != null) {
+        myString[ui.draggable.attr("data-index")] = "*";
+      }
+
+      //console.log(myString);
+      //console.log($(this).attr("data-index"));
+      //console.log(ui.draggable.attr("data-index"));
+      if ($(this).attr("data-index") != ui.draggable.attr("data-index")
+        && $("#tableBoard td[data-status='on']").length > 0
+        && ui.draggable.attr("data-index") != null) {
+        printErrorMessages("Once the tile is placed on the Scrabble board, it can not be moved. Take it back to the rack to move it.");
+        ui.draggable.draggable("option", "revert", true);
+        myString[index] = "*";
+        myString[ui.draggable.attr("data-index")] = ui.draggable.attr("data-name");
+        //console.log(myString);
+      } else {
+        if (isAdjacent(index)) {
+          printErrorMessages("");
+          // accept specific draggable item
+          // Set position fit to the drop
+          // https://forum.jquery.com/topic/drag-and-drop-issue-fit-my-drop
+          var offset = $(this).offset();
+          ui.draggable.css({
+            position: 'absolute',
+            top: offset.top,
+            left: offset.left
+          });
+
+          // Setup data for img
+          ui.draggable.attr("data-index", index);
+          ui.draggable.attr("data-status", "on");
+
+          // Update and display string
+          myString[index] = ui.draggable.attr("data-name");
+          updateTD(index);
+          //console.log(myString);
+          // Display string result
+          $("#myString").text("Word: " + displayString());
+
+          // Display Score
+          $("#score").text("Score:" + score());
+
+          // Does not accept two letters on the same square
+          $(this).droppable('option', 'accept', ui.draggable);
+          $("#tableBoard td[data-status='off']").droppable('option', 'accept', "img");
+        } else {
+          //
+          ui.draggable.draggable("option", "revert", true);
+          $("#tableBoard td[data-status='off']").droppable('option', 'accept', "img");
+
+          // Delete and set back value to myString
+          //var index = $(this).attr("data-index");
+          myString[index] = "*";
+
+          //console.log(myString);
+          printErrorMessages("Do not allow space between two letters.");
+          //console.log("After remove:");
+          //console.log(myString);
+        }
+      }
+    },
+
+    // Out of board
+    out: function (event, ui) {
+      //console.log("out from board");    
+      $(this).css("box-shadow", "");
+    },
+
+    over: function (event, ui) {
+      $(this).css("box-shadow", "0px 0px 7px 8px red");
+    }
+  });
+
+
+  // Holder droppable
+  $("#tableHolder td").droppable({
+    drop: function (event, ui) {
+      //console.log("accept items from board");
+      printErrorMessages("");
+      $(this).css("box-shadow", "");
+
+      $(this).attr("data-status", "on");
+
+      var previousLetter = ui.draggable.attr("data-previous-letter");
+      if (previousLetter != null) {
+        ui.draggable.attr("src", "./images/Scrabble_Tile_Blank.jpg");
+        ui.draggable.attr("data-name", "Blank");
+      }
+
+      // Set position fit to the drop
+      var offset = $(this).offset();
+      ui.draggable.css({
+        position: 'absolute',
+        top: offset.top + 2,
+        left: offset.left
+      });
+      $("#tableBoard td[data-index='" + ui.draggable.attr("data-index") + "']").attr("data-status", "off");
+      myString[ui.draggable.attr("data-index")] = "*";
+      ui.draggable.removeAttr("data-status");
+      ui.draggable.removeAttr("data-index");
+      ui.draggable.removeAttr("data-previous-letter");
+      $("#myString").text("Word: " + displayString());
+      $("#score").text("Score:" + score());
+
+      $("#tableBoard td[data-status='off']").droppable('option', 'accept', "img");
+    },
+
+    out: function (event, ui) {
+      //console.log("out from holder");
+      $(this).css("box-shadow", "");
+    },
+
+    over: function (event, ui) {
+      $(this).css("box-shadow", "0px 0px 7px 8px blue");
+    }
+
+  });
+
+  /*##################################################
+    #   FUNCTIONS LOCATED HERE
+    ##################################################
+  */
+
+  // Update information for td tag
+  function updateTD(index) {
+    //console.log(myString);
+    $("#tableBoard td[data-index='" + index + "']").attr("data-name", myString[index]);
+    $("#tableBoard td[data-index='" + index + "']").attr("data-status", "on");
+  }
+
+  // Check if there must be two blocks are adjacent
+  function isAdjacent() {
+    // Check error (no allow space between letters)
+    var firstLetter = false;
+
+    for (var i = 0; i < myString.length - 1; i++) {
+      if (!firstLetter) {
+        if (myString[i] != "*") {
+          firstLetter = true;
+        }
+      } else {
+        if (myString[i] == "*" && myString[i + 1] != "*") {
+          return false;
+        }
+      }
+    }
+    //console.log(myString);
+    //console.log(isAdjacent);
+    return true;
+  }
+
+  // print error messages
+  function printErrorMessages(msg) {
+    $("#error-message p").text(msg);
+    $("#error-message p").css("color", "red");
+  }
+
+  // update remaining table 
+  function updateRemainTable() {
+    var i;
+    for (i = 0; i < $("#tableRemain td").length; i++) {
+      var letter = Object.keys(ScrabbleTiles)[i];
+      $("#tableRemain td").eq(i).text(letter + ": " + ScrabbleTiles[letter].remaining);
+    }
+  }
+
+  function displayString() {
+    var str = "";
+    var firstLetterIndex;
+    var lastLetterIndex;
+    var i;
+    for (i = 0; i < myString.length; i++) {
+      if (myString[i] != "*") {
+        firstLetterIndex = i;
+        break;
+      }
+    }
+
+    for (i = myString.length - 1; i >= 0; i--) {
+      if (myString[i] != "*") {
+        lastLetterIndex = i;
+        break;
+      }
+    }
+
+    //console.log("first: " + firstLetterIndex);
+    //console.log("last: " + lastLetterIndex);
+
+    for (i = firstLetterIndex; i <= lastLetterIndex; i++) {
+      if (myString[i] == "Blank") {
+        str += "_";
+      } else {
+        str += myString[i];
+      }
+    }
+
+    return str;
+  }
+
+  function score() {
+    var score = 0;
+    var status = $("img[data-status='on']");
+    var condition;
+    var wordPrice = [];
+    var price;
+
+    if (checkWords()) {
+      isValidWord = true;
+      for (i = 0; i < status.length; i++) {
+        var index = status.eq(i).attr("data-name");
+        if (index == "Blank") {
+          index = "_";
+        }
+
+        var v = ScrabbleTiles[index].value;
+
+        var dataFromTd = $("#tableBoard td[data-index='" + status.eq(i).attr("data-index") + "']").attr("data-price");
+        //console.log(v);
+        if (dataFromTd != null) {
+          dataFromTd = dataFromTd.split("-");
+          condition = dataFromTd[0];
+          price = parseInt(dataFromTd[1]);
+          if (condition == "letter") {
+            score += v * price;
+          } else {
+            wordPrice.push(price);
+            score += v;
+          }
+        } else {
+          score += v;
+        }
+      }
+      //console.log(totalScore);
+      //console.log(wordPrice);
+      if (wordPrice.length > 0) {
+        for (i = 0; i < wordPrice.length; i++) {
+          score = score * parseInt(wordPrice[i]);
+        }
+      }
+      return score;
+    } else {
+      return 0;
+    }
+  }
+
+  // Check valid words
+  function checkWords() {
+    var myWord = "";
+    var i;
+    var firstLetterIndex;
+    var lastLetterIndex;
+
+    for (i = 0; i < myString.length; i++) {
+      if (myString[i] != "*") {
+        firstLetterIndex = i;
+        break;
+      }
+    }
+
+    for (i = myString.length - 1; i >= 0; i--) {
+      if (myString[i] != "*") {
+        lastLetterIndex = i;
+        break;
+      }
+    }
+
+    //console.log(myString);
+    //console.log("first: " + firstLetterIndex);
+    //console.log("last: " + lastLetterIndex);
+
+    for (i = firstLetterIndex; i <= lastLetterIndex; i++) {
+      if (myString[i] == "*") {
+        return false;
+      } else {
+        if (myString[i] != "Blank") {
+          myWord += myString[i].toLowerCase();
+        }
+      }
+    }
+
+    //console.log("myWord:" + myWord);
+
+    //console.log("myWords: " + myWords);
+    //console.log("result: " + findWord(['m',' ', 'a', 'p']))
+
+    if (findWord(myWord) != "") {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  // https://johnresig.com/blog/dictionary-lookups-in-javascript/
+  // Find the word in the dictionary
+  function findWord(word) {
+    if (word.length > 1) {
+      if (dict[word]) {
+        // If found, return the word
+        return word;
+      }
+    }
+    return "";
+  }
+
+});

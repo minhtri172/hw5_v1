@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Scrabble Game</title>
+    <link href="css/hw5.css" rel="stylesheet">
+    <link href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="wrapper">
+        <div id="board"></div>
+        <div id="view">
+            <div id="left-display">
+                <p id="myString">Word:</p>
+                <p id="score">Score: 0</p>
+                <p id="totalScore">Total Score: 0</p>
+                <div id="dialog-message"></div>
+            </div>
+            <div id="right-display">
+                <div id="control">
+                    <button id="btnNextWord">Next Word</button>
+                    <button id="btnStartOver">Start Over</button>
+                    <button id="btnReset">Reset Tiles</button>
+                </div>
+                <div id="save"></div>
+                <div id="error-message"><p></p></div>
+            </div>
+        </div>
+        <div id="holder"></div>
+    </div>
+
+
+    <!-- JavaScript -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.3/dist/jquery.validate.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"
+        integrity="sha256-xH4q8N0pEzrZMaRmd7gQVcTZiFei+HfRTBPJ1OGXC0k=" crossorigin="anonymous"></script>
+    <script src="js/hw5.js"></script>
+</body>
+
+</html>

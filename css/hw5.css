@@ -1,0 +1,101 @@
+#wrapper {
+    width: 1200px;
+    margin: 0 auto;
+    font-size: 16pt;
+}
+#board {
+    background-image: url("../images/Scrabble_Board_OneLine.png");
+    background-repeat: no-repeat;
+    margin-top: 100px;
+}
+
+#tableBoard {
+    border-collapse: collapse;
+}
+
+#board td {
+    width: 68px;
+    height: 68px;
+    border: 5px solid black;
+}
+
+#tableHolder img {
+    width: 71px;
+    height: 71px;
+}
+
+#dialog-message img {
+    width: 61px;
+    height: 61px;
+}
+
+#dialog-message ul {
+    list-style-type: none;
+}
+
+#dialog-message ul li {
+    display: inline;
+    margin-left: 4px;
+    background-color: black;
+    cursor: pointer;
+}
+
+#holder {
+    background-image: url("../images/scrabble-tile-holder-406774_640.png");
+    background-repeat: no-repeat;
+    padding: 55px;
+}
+
+#holder td {
+    width: 73px;
+    height: 77px;
+}
+
+#view {
+    overflow: auto;
+}
+
+#left-display {
+    width: 40%;
+    float: left;
+}
+
+#right-display {
+    width: 60%;
+    float: right;
+}
+
+#tableRemain {
+    border-spacing: 20px;
+   
+}
+
+#myString, #totalScore, #score {
+    margin-left: 20px;
+}
+
+#choose {
+    width: 800px;
+    height: 227px;
+    margin: 0 auto;
+}
+
+.no-close .ui-dialog-titlebar-close {
+    display: none;
+}
+
+#control {
+    margin-top: 20px;
+}
+
+button {
+    background-color: #24a0ed;
+    color: white;
+    margin-left: 10px;
+    cursor: pointer;
+    width: 130px;
+    height: 50px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
