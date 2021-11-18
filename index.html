@@ -1,3 +1,10 @@
+<!--
+    File: index.html
+    GUI Assigment: Implementing a Bit of Scrabble with Drag-and-Drop
+    Minh Le, Umass Lowell Computer Science, minhtri_le@student.uml.edu
+    Copyright (C) 2021 by Minh Le. 
+    Updated by ML on November 18, 2021 at 7:00pm
+-->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,7 +17,9 @@
 
 <body>
     <div id="wrapper">
+        <!-- The board -->
         <div id="board"></div>
+        <!-- Everything below the board -->
         <div id="view">
             <div id="left-display">
                 <p id="myString">Word:</p>
@@ -23,11 +32,13 @@
                     <button id="btnNextWord">Next Word</button>
                     <button id="btnStartOver">Start Over</button>
                     <button id="btnReset">Reset Tiles</button>
+                    <button id="btnNewTiles">Get New Tiles</button>
                 </div>
                 <div id="save"></div>
                 <div id="error-message"><p></p></div>
             </div>
         </div>
+        <!-- The rack -->
         <div id="holder"></div>
     </div>
 

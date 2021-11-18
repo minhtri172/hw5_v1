@@ -1,14 +1,26 @@
+/*
+    File: hw5.css
+    GUI Assigment: Implementing a Bit of Scrabble with Drag-and-Drop
+    Minh Le, Umass Lowell Computer Science, minhtri_le@student.uml.edu
+    Copyright (C) 2021 by Minh Le. 
+    Updated by ML on November 8, 2021 at 7:00pm
+*/
+
+/* Display wrapper as a grid with two columns 5:4 */
 #wrapper {
     width: 1200px;
     margin: 0 auto;
     font-size: 16pt;
 }
+
+/* Display the board with a given image */
 #board {
     background-image: url("../images/Scrabble_Board_OneLine.png");
     background-repeat: no-repeat;
     margin-top: 100px;
 }
 
+/* Config the board */
 #tableBoard {
     border-collapse: collapse;
 }
@@ -19,11 +31,13 @@
     border: 5px solid black;
 }
 
+/* Config the hodler (the rack) */
 #tableHolder img {
     width: 71px;
     height: 71px;
 }
 
+/* Config dialog */
 #dialog-message img {
     width: 61px;
     height: 61px;
@@ -40,6 +54,7 @@
     cursor: pointer;
 }
 
+/* Config dislay saved words */
 #holder {
     background-image: url("../images/scrabble-tile-holder-406774_640.png");
     background-repeat: no-repeat;
@@ -51,43 +66,45 @@
     height: 77px;
 }
 
+/* Display Word, Score, Total Score, Saved Words and Buttons */
 #view {
     overflow: auto;
 }
 
+/* Display Word, Score, Total Score */
 #left-display {
     width: 40%;
     float: left;
 }
 
+/* Saved Words and Buttons */
 #right-display {
     width: 60%;
     float: right;
 }
 
+/* Config table remaining */
 #tableRemain {
     border-spacing: 20px;
    
 }
 
+/* Config Word, Score, Total Score */
 #myString, #totalScore, #score {
     margin-left: 20px;
 }
 
-#choose {
-    width: 800px;
-    height: 227px;
-    margin: 0 auto;
-}
-
+/* No close icon on dialog */
 .no-close .ui-dialog-titlebar-close {
     display: none;
 }
 
+/* Div contains buttons */
 #control {
     margin-top: 20px;
 }
 
+/* Config buttons */
 button {
     background-color: #24a0ed;
     color: white;
