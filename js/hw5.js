@@ -485,7 +485,7 @@ $(document).ready(function () {
         myString[ui.draggable.attr("data-index")] = ui.draggable.attr("data-name");
         //console.log(myString);
       } else {
-        if (isAdjacent(index)) {
+        if (isAdjacent()) {
           // Here is valid move
           printErrorMessages("");
           // accept specific draggable item
@@ -549,32 +549,39 @@ $(document).ready(function () {
     drop: function (event, ui) {
       //console.log("accept items from board");
       printErrorMessages("");
-      $(this).css("box-shadow", "");
-
-      $(this).attr("data-status", "on");
-
-      var previousLetter = ui.draggable.attr("data-previous-letter");
-      if (previousLetter != null) {
-        ui.draggable.attr("src", "./images/Scrabble_Tile_Blank.jpg");
-        ui.draggable.attr("data-name", "Blank");
-      }
-
-      // Set position fit to the drop
-      var offset = $(this).offset();
-      ui.draggable.css({
-        position: 'absolute',
-        top: offset.top + 2,
-        left: offset.left
-      });
-      $("#tableBoard td[data-index='" + ui.draggable.attr("data-index") + "']").attr("data-status", "off");
       myString[ui.draggable.attr("data-index")] = "*";
-      ui.draggable.removeAttr("data-status");
-      ui.draggable.removeAttr("data-index");
-      ui.draggable.removeAttr("data-previous-letter");
-      $("#myString").text("Word: " + displayString());
-      $("#score").text("Score:" + score());
+      if (isAdjacent()) { // do not allow space between 2 letters
+        $(this).css("box-shadow", "");
 
-      $("#tableBoard td[data-status='off']").droppable('option', 'accept', "img");
+        $(this).attr("data-status", "on");
+  
+        var previousLetter = ui.draggable.attr("data-previous-letter");
+        if (previousLetter != null) {
+          ui.draggable.attr("src", "./images/Scrabble_Tile_Blank.jpg");
+          ui.draggable.attr("data-name", "Blank");
+        }
+  
+        // Set position fit to the drop
+        var offset = $(this).offset();
+        ui.draggable.css({
+          position: 'absolute',
+          top: offset.top + 2,
+          left: offset.left
+        });
+        $("#tableBoard td[data-index='" + ui.draggable.attr("data-index") + "']").attr("data-status", "off");
+        ui.draggable.removeAttr("data-status");
+        ui.draggable.removeAttr("data-index");
+        ui.draggable.removeAttr("data-previous-letter");
+        $("#myString").text("Word: " + displayString());
+        $("#score").text("Score:" + score());
+  
+        $("#tableBoard td[data-status='off']").droppable('option', 'accept', "img");
+      } else {
+        ui.draggable.draggable("option", "revert", true);
+        myString[ui.draggable.attr("data-index")] = ui.draggable.attr("data-name");
+        printErrorMessages("Do not allow space between two letters.");
+      }
+      
     },
 
     out: function (event, ui) {
