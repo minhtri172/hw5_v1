@@ -83,6 +83,12 @@
     float: right;
 }
 
+#save {
+    overflow: auto;
+    height: 170px;
+    margin-top: 20px;
+}
+
 /* Config table remaining */
 #tableRemain {
     border-spacing: 20px;

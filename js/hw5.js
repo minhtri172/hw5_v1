@@ -562,11 +562,10 @@ $(document).ready(function () {
         }
   
         // Set position fit to the drop
-        var offset = $(this).offset();
         ui.draggable.css({
-          position: 'absolute',
-          top: offset.top + 2,
-          left: offset.left
+          position: 'relative',
+          top: 0,
+          left: 0
         });
         $("#tableBoard td[data-index='" + ui.draggable.attr("data-index") + "']").attr("data-status", "off");
         ui.draggable.removeAttr("data-status");
