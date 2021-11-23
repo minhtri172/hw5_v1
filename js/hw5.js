@@ -3,7 +3,7 @@
     GUI Assigment: Implementing a Bit of Scrabble with Drag-and-Drop
     Minh Le, Umass Lowell Computer Science, minhtri_le@student.uml.edu
     Copyright (C) 2021 by Minh Le. 
-    Updated by ML on November 18, 2021 at 11:00pm
+    Updated by ML on November 23, 2021 at 11:00pm
 */
 $(document).ready(function () {
   // Data structure stores letters
@@ -59,15 +59,15 @@ $(document).ready(function () {
   var totalScore = 0;
   var isValidWord = false;
 
-  // Settup dictionary
-  // Reference: https://johnresig.com/blog/dictionary-lookups-in-javascript/
-  $.get("dict/dict.txt", function (txt) {
-    // Get an array of all the words
-    var words = txt.split("\n");
+  // Set dictionary to dict (data get from the file dict.txt)
+  // Reference from : https://johnresig.com/blog/dictionary-lookups-in-javascript/
+  $.get("dict/dict.txt", function (file) {
+    // Get words
+    var words = file.split("\n");
     //console.log(words);
 
-    // And add them as properties to the dictionary lookup
-    // This will allow for fast lookups later
+    // Create an boolean array to store words
+    // Set all words to true, then use it to check whether the word in dictionary 
     for (i = 0; i < words.length; i++) {
       dict[words[i]] = true;
     }
@@ -554,13 +554,13 @@ $(document).ready(function () {
         $(this).css("box-shadow", "");
 
         $(this).attr("data-status", "on");
-  
+
         var previousLetter = ui.draggable.attr("data-previous-letter");
         if (previousLetter != null) {
           ui.draggable.attr("src", "./images/Scrabble_Tile_Blank.jpg");
           ui.draggable.attr("data-name", "Blank");
         }
-  
+
         // Set position fit to the drop
         ui.draggable.css({
           position: 'relative',
@@ -573,14 +573,14 @@ $(document).ready(function () {
         ui.draggable.removeAttr("data-previous-letter");
         $("#myString").text("Word: " + displayString());
         $("#score").text("Score:" + score());
-  
+
         $("#tableBoard td[data-status='off']").droppable('option', 'accept', "img");
       } else {
         ui.draggable.draggable("option", "revert", true);
         myString[ui.draggable.attr("data-index")] = ui.draggable.attr("data-name");
         printErrorMessages("Do not allow space between two letters.");
       }
-      
+
     },
 
     out: function (event, ui) {
@@ -774,16 +774,22 @@ $(document).ready(function () {
     }
   }
 
-  // https://johnresig.com/blog/dictionary-lookups-in-javascript/
   // Find the word in the dictionary
+  // Reference from : https://johnresig.com/blog/dictionary-lookups-in-javascript/
   function findWord(word) {
+    //console.log("word search: " + word);
+
+    // If the word on the dictionary, return it
     if (word.length > 1) {
-      if (dict[word]) {
-        // If found, return the word
+      if (dict[word]) { // if found the word
         return word;
       }
     }
+
+    // if go here that means not found the word, dict[word] == null
+    // if not, return nothing
     return "";
   }
+
 
 });
