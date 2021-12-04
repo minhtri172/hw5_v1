@@ -731,7 +731,6 @@ $(document).ready(function () {
   // Reference from : https://johnresig.com/blog/dictionary-lookups-in-javascript/
   function findWord(word) {
     //console.log("word search: " + word);
-    word = word.toLowerCase();
     // If the word on the dictionary
     if (word.length > 1) {
       if (dict[word]) { // if found the word, return true
