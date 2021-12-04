@@ -395,8 +395,8 @@ $(document).ready(function () {
       Ok: function () {
         if (chosenLetter != null) { // If a tile is chosen
           //console.log(chosenLetter)
+          myString[$("img[data-status='on'][data-name='Blank']").attr("data-index")] = chosenLetter;
           $("img[data-status='on'][data-name='Blank']").attr("data-name", chosenLetter);
-          myString[$("img[data-status='on'][data-name='" + chosenLetter + "']").attr("data-index")] = chosenLetter;
           //console.log("update string: " + myString);
           var my_word = displayString();
           $("#myString").text("Word: " + my_word);
@@ -429,6 +429,7 @@ $(document).ready(function () {
         // Change the image of the tile depend on which tile players chose
         $("img[data-status='on'][data-name='Blank']").attr("data-previous-letter", "_");
         $("img[data-status='on'][data-name='Blank']").attr("src", "./images/Scrabble_Tile_" + chosenLetter + ".jpg")
+        
         $(ui.selected).css("background-color", "red");
       } else {
         $("img[data-status='on'][data-name='Blank']").attr("src", "./images/Scrabble_Tile_Blank.jpg")
@@ -464,10 +465,6 @@ $(document).ready(function () {
       $("#tableHolder td").eq(ui.draggable.attr("data-index-holder")).attr("data-status", "off");
       var letterResult = ui.draggable.attr("data-name"); // get letter
 
-      if (letterResult == "Blank") {
-        $("#dialog-message").dialog("open");
-      }
-
       // Get index of the letter (where it is)
       var index = $(this).attr("data-index");
       myString[index] = letterResult;
@@ -495,6 +492,12 @@ $(document).ready(function () {
         if (isAdjacent()) {
           // Here is valid move
           printErrorMessages("");
+
+          // Blank
+          if (letterResult == "Blank") {
+            $("#dialog-message").dialog("open");
+          }
+
           // accept specific draggable item
           // Set position fit to the drop
           // https://forum.jquery.com/topic/drag-and-drop-issue-fit-my-drop
