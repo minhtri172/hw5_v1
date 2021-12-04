@@ -3,7 +3,7 @@
     GUI Assigment: Implementing a Bit of Scrabble with Drag-and-Drop
     Minh Le, Umass Lowell Computer Science, minhtri_le@student.uml.edu
     Copyright (C) 2021 by Minh Le. 
-    Updated by ML on November 23, 2021 at 11:00pm
+    Updated by ML on December 3, 2021 at 9:00pm
 */
 $(document).ready(function () {
   // Data structure stores letters
@@ -129,7 +129,12 @@ $(document).ready(function () {
   // Button next word
   $("#btnNextWord").click(function () {
     // Calculate total score
-    totalScore += score();
+    // Get score
+    var containScore = $("#score").text();
+    containScore = containScore.split(" ");
+    var my_score = parseInt(containScore[1]);
+
+    totalScore += my_score;
 
     if ($("#tableHolder td[data-status='off']").length > 0) { // if there is a word on the board
       if (isValidWord) { // if the word is valid
@@ -148,7 +153,8 @@ $(document).ready(function () {
         $("#totalScore").text("Total Score: " + totalScore);
 
         // Display saved words
-        $("#save").append("<p>Word: " + displayString() + " ---- Score: " + score() + "</p>");
+        var my_word = displayString();
+        $("#save").append("<p>Word: " + my_word + " ---- Score: " + score(my_word) + "</p>");
 
         // Reset attribute on tiles
         $("#tableBoard td").attr("data-status", "off");
@@ -392,9 +398,10 @@ $(document).ready(function () {
           $("img[data-status='on'][data-name='Blank']").attr("data-name", chosenLetter);
           myString[$("img[data-status='on'][data-name='" + chosenLetter + "']").attr("data-index")] = chosenLetter;
           //console.log("update string: " + myString);
-          $("#myString").text("Word: " + displayString());
+          var my_word = displayString();
+          $("#myString").text("Word: " + my_word);
           // Display Score
-          $("#score").text("Score:" + score());
+          $("#score").text("Score: " + score(my_word));
           chosenLetter = null;
           $("li[class='ui-selectee ui-selected']").css("background-color", "black");
           $(this).dialog("close");
@@ -504,16 +511,18 @@ $(document).ready(function () {
 
           // Update and display string
           myString[index] = ui.draggable.attr("data-name");
-          updateTD(index);
+          
           //console.log(myString);
           // Display string result
-          $("#myString").text("Word: " + displayString());
+          var my_word = displayString();
+          $("#myString").text("Word: " + my_word);
 
           // Display Score
-          $("#score").text("Score:" + score());
+          $("#score").text("Score: " + score(my_word));
 
           // Does not accept two letters on the same square
           $(this).droppable('option', 'accept', ui.draggable);
+          $(this).attr("data-status", "on");
           $("#tableBoard td[data-status='off']").droppable('option', 'accept', "img");
         } else {
           // Unvalid move: there is space between 2 letters
@@ -571,8 +580,9 @@ $(document).ready(function () {
         ui.draggable.removeAttr("data-status");
         ui.draggable.removeAttr("data-index");
         ui.draggable.removeAttr("data-previous-letter");
-        $("#myString").text("Word: " + displayString());
-        $("#score").text("Score:" + score());
+        var my_word = displayString();
+        $("#myString").text("Word: " + my_word);
+        $("#score").text("Score: " + score(my_word));
 
         $("#tableBoard td[data-status='off']").droppable('option', 'accept', "img");
       } else {
@@ -598,14 +608,6 @@ $(document).ready(function () {
     #   FUNCTIONS LOCATED HERE
     ##################################################
   */
-
-  // Update information for td tag
-  function updateTD(index) {
-    //console.log(myString);
-    $("#tableBoard td[data-index='" + index + "']").attr("data-name", myString[index]);
-    $("#tableBoard td[data-index='" + index + "']").attr("data-status", "on");
-  }
-
   // Check if there must be two blocks are adjacent
   function isAdjacent() {
     // Check error (no allow space between letters)
@@ -677,14 +679,14 @@ $(document).ready(function () {
   }
 
   // Return the result score
-  function score() {
+  function score(my_word) {
     var score = 0;
     var status = $("img[data-status='on']");
     var condition;
     var wordPrice = [];
     var price;
 
-    if (checkWords()) {
+    if (findWord(my_word)) {
       isValidWord = true;
       for (i = 0; i < status.length; i++) {
         var index = status.eq(i).attr("data-name");
@@ -725,71 +727,20 @@ $(document).ready(function () {
     }
   }
 
-  // Check valid words
-  // This remove the first stars and last stars
-  // For example: ****ABC**** = ABC
-  function checkWords() {
-    var myWord = "";
-    var i;
-    var firstLetterIndex;
-    var lastLetterIndex;
-
-    for (i = 0; i < myString.length; i++) {
-      if (myString[i] != "*") {
-        firstLetterIndex = i;
-        break;
-      }
-    }
-
-    for (i = myString.length - 1; i >= 0; i--) {
-      if (myString[i] != "*") {
-        lastLetterIndex = i;
-        break;
-      }
-    }
-
-    //console.log(myString);
-    //console.log("first: " + firstLetterIndex);
-    //console.log("last: " + lastLetterIndex);
-
-    for (i = firstLetterIndex; i <= lastLetterIndex; i++) {
-      if (myString[i] == "*") {
-        return false;
-      } else {
-        if (myString[i] != "Blank") {
-          myWord += myString[i].toLowerCase();
-        }
-      }
-    }
-
-    //console.log("myWord:" + myWord);
-
-    //console.log("myWords: " + myWords);
-    //console.log("result: " + findWord(['m',' ', 'a', 'p']))
-
-    if (findWord(myWord) != "") {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
   // Find the word in the dictionary
   // Reference from : https://johnresig.com/blog/dictionary-lookups-in-javascript/
   function findWord(word) {
     //console.log("word search: " + word);
-
-    // If the word on the dictionary, return it
+    word = word.toLowerCase();
+    // If the word on the dictionary
     if (word.length > 1) {
-      if (dict[word]) { // if found the word
-        return word;
+      if (dict[word]) { // if found the word, return true
+        return true;
       }
     }
 
-    // if go here that means not found the word, dict[word] == null
-    // if not, return nothing
-    return "";
+    // if go here that means not found the word
+    // if not, return false
+    return false;
   }
-
-
 });
