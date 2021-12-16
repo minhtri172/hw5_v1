@@ -3,7 +3,7 @@
     GUI Assigment: Implementing a Bit of Scrabble with Drag-and-Drop
     Minh Le, Umass Lowell Computer Science, minhtri_le@student.uml.edu
     Copyright (C) 2021 by Minh Le. 
-    Updated by ML on December 3, 2021 at 9:00pm
+    Updated by ML on December 16, 2021 at 4:00pm
 */
 $(document).ready(function () {
   // Data structure stores letters
@@ -534,7 +534,12 @@ $(document).ready(function () {
 
           // Delete and set back value to myString
           //var index = $(this).attr("data-index");
-          myString[index] = "*";
+          if (ui.draggable.attr("data-index") == null) {
+            myString[index] = "*";
+          } else {
+            myString[index] = ui.draggable.attr("data-name");
+          }
+         
 
           //console.log(myString);
           printErrorMessages("Do not allow space between two letters.");
